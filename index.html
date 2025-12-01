@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>A Tiny, Cute Note</title>
+
+<!-- Added Google Font for better readability on all devices -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  body{
+    margin:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+    background:#ffecf4;
+    font-family:'Poppins', sans-serif;
+    padding:20px;
+    text-align:center;
+    overflow:hidden;
+    position:relative;
+    transition: background 1s;
+  }
+
+  @keyframes floatHeart {
+    0% { transform: translateY(0) scale(0.8); opacity: 0.6; }
+    50% { transform: translateY(-30px) scale(1.1); opacity: 1; }
+    100% { transform: translateY(0) scale(0.8); opacity: 0.6; }
+  }
+
+  .heart-deco {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #ff76a2;
+    border-radius: 50%;
+    transform: rotate(45deg);
+    box-shadow: 0 0 8px rgba(255, 118, 162, 0.5);
+    animation: floatHeart 5s infinite ease-in-out alternate;
+    z-index: 1;
+  }
+  .heart-deco::before, .heart-deco::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    border-radius: 50%;
+  }
+  .heart-deco::before { top: -50%; left: 0; }
+  .heart-deco::after { top: 0; left: 50%; }
+
+  .heart-deco:nth-child(1) { top: 15%; left: 10%; }
+  .heart-deco:nth-child(2) { top: 70%; right: 15%; animation-delay: 2s; }
+  .heart-deco:nth-child(3) { top: 40%; left: 85%; animation-delay: 4s; }
+  .heart-deco:nth-child(4) { top: 10%; left: 50%; animation-delay: 1s; }
+  .heart-deco:nth-child(5) { top: 80%; left: 30%; animation-delay: 3s; }
+  .heart-deco:nth-child(6) { top: 25%; right: 30%; animation-delay: 5s; }
+  .heart-deco:nth-child(7) { top: 60%; left: 5%; animation-delay: 1.8s; }
+  .heart-deco:nth-child(8) { top: 50%; right: 70%; animation-delay: 3.8s; }
+
+  .envelope {
+    cursor: pointer;
+    background-color: #7bc9ff;
+    width: 250px;
+    height: 150px;
+    border-radius: 10px;
+    position: absolute;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.6s ease, opacity 0.6s ease;
+    z-index: 20;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    color:white;
+    font-weight:bold;
+  }
+  .envelope.open {
+    transform: scale(0.5) translateY(50px);
+    opacity:0;
+  }
+  .envelope::after {
+    content: '💌 Click Me';
+    position: absolute;
+  }
+
+  .letter{
+    z-index: 10;
+    background:#ffffff;
+    border:6px dashed #7bc9ff;
+    padding:30px 40px;
+    border-radius:20px;
+    max-width:420px;
+    font-size:20px;
+    line-height:1.5;
+    color:#5a4632;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+    opacity:0;
+    transform:scale(0.8);
+    transition: opacity 1s ease, transform 1s ease;
+    font-family:'Poppins', sans-serif;
+  }
+  .letter.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  button{
+    margin:10px;
+    padding:10px 20px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:18px;
+    font-family:'Poppins', sans-serif;
+    font-weight:bold;
+    border:3px solid transparent;
+    transition:0.3s ease;
+  }
+  .next{
+    background:#fff0f5;
+    color:#ff76a2;
+    border-color:#ff76a2;
+  }
+  .exit{
+    background:#e0f7fa;
+    color:#7bc9ff;
+    border-color:#7bc9ff;
+  }
+  .back{
+    background:#ffffcc;
+    color:#c4a000;
+    border-color:#c4a000;
+  }
+  button:hover{
+    transform:scale(1.08);
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+  }
+
+  .note-header {
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 15px;
+    color: #ff76a2;
+    font-family:'Poppins', sans-serif;
+  }
+
+  .modal-overlay {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    visibility:hidden;
+    transition:0.3s;
+    z-index:100;
+  }
+  .modal-overlay.active{
+    opacity:1;
+    visibility:visible;
+  }
+  .modal-content{
+    background:#fff;
+    padding:30px;
+    border-radius:15px;
+    width:450px;
+    max-width:90%;
+    text-align:left;
+    font-family:'Poppins', sans-serif;
+  }
+  .modal-content pre{
+    background:#f7f7f7;
+    padding:15px;
+    border-radius:10px;
+    font-size:14px;
+    white-space: pre-wrap;
+    font-family:'Poppins', sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<div class="heart-deco"></div>
+<div class="heart-deco"></div>
+<div class="heart-deco"></div>
+<div class="heart-deco"></div>
+<div class="heart-deco"></div>
+<div class="heart-deco"></div>
+<div class="heart-deco"></div>
+<div class="heart-deco"></div>
+
+<div class="envelope" id="env" onclick="openEnv()"></div>
+<div class="letter" id="content"></div>
+
+<div class="modal-overlay" id="lyricModal">
+  <div class="modal-content" id="modalContent">
+      <pre id="modalText">
+If we never try
+How will we know?
+Baby, how far this thing could go
+Give me a sign
+If I'm on your mind
+I don't wanna fall in love alone
+      </pre>
+
+      <button class="next" onclick="continueNo()">Continue</button>
+      <button class="back" onclick="backFromModal()">Back</button>
+  </div>
+</div>
+
+<script>
+let opened = false;
+let historyStack = [];
+const letterEl = document.getElementById('content');
+const envelopeEl = document.getElementById('env');
+const modalEl = document.getElementById('lyricModal');
+const modalText = document.getElementById('modalText');
+
+function navigate(fn){
+  historyStack.push(fn);
+  fn();
+}
+
+function goBack(){
+  historyStack.pop();
+  let prev = historyStack.pop();
+  if(prev) prev();
+  else showHome();
+}
+
+function openEnv(){
+  if(opened) return;
+  opened = true;
+  envelopeEl.classList.add('open');
+  setTimeout(()=>{
+    envelopeEl.style.display='none';
+    letterEl.classList.add('visible');
+    navigate(showHome);
+  },600);
+}
+
+function showHome(){
+  set(`
+    <div class='note-header'>HEY, I WANT TO TELL YOU SOMETHING</div>
+  `, `
+    <button class='next' onclick='navigate(step1)'>Yes, tell me...</button>
+    <button class='exit' onclick='navigate(exitMsg)'>No, you are so cringe</button>
+  `);
+}
+
+function set(msg, btns=""){
+  letterEl.innerHTML = msg + btns;
+}
+
+function exitMsg(){
+  set(`
+    <div class='note-header' style='color:#7bc9ff;'>That was Unexpected but...</div>
+    <p>Let me know saying that was cringe and I should stop</p>
+  `, `<button class='back' onclick='goBack()'>Back</button>`);
+}
+
+function step1(){
+  set(`
+    <div class='note-header'>Confession</div>
+    <p>I really really like you.</p>
+    <p>And I don't want to give up on this.</p>
+  `, `
+    <button class='back' onclick='goBack()'>Back</button>
+    <button class='next' onclick='navigate(step2)'>Next</button>
+    <button class='exit' onclick='navigate(exitMsg)'>Exit</button>
+  `);
+}
+
+function step2(){
+  set(`
+    <div class='note-header'>My efforts</div>
+    <p>I want to try and make efforts to make this work out, cuz I know my problems and I want to improve myself.</p>
+  `, `
+    <button class='back' onclick='goBack()'>Back</button>
+    <button class='next' onclick='navigate(step3)'>Next</button>
+    <button class='exit' onclick='navigate(exitMsg)'>Exit</button>
+  `);
+}
+
+function step3(){
+  set(`
+    <div class='note-header'>NO CAP but</div>
+    <p>I'm happy when I'm with you. and I'm missing you a lot rn.</p>
+  `, `
+    <button class='back' onclick='goBack()'>Back</button>
+    <button class='next' onclick='navigate(quiz)'>Next</button>
+    <button class='exit' onclick='navigate(exitMsg)'>Exit</button>
+  `);
+}
+
+function quiz(){
+  set(`
+    <div class='note-header'>❓ Your Answer</div>
+    <p>Please choose one:</p><br>
+
+    1) Give up: Shruti, Plz don't text me, I really want to end it.<br>
+    <button class='exit' onclick='navigate(option1)'>Choose 1</button><br><br>
+
+    2) Another try: Shruti, I'm ready to give it another try.<br>
+    <button class='next' onclick='navigate(option2)'>Choose 2</button><br><br>
+
+    3) Need time : Shruti, Give me more time to decide or I have a different suggestion.<br>
+    <button class='next' onclick='navigate(option3)'>Choose 3</button>
+  `, `<button class='back' onclick='goBack()'>Back</button>`);
+}
+
+function option1(){
+  letterEl.classList.remove('visible');
+  modalEl.classList.add('active');
+}
+
+function continueNo(){
+  modalText.textContent = `if it's a no, please dm me following:
+"I don't want to continue please stop texting and calling me" and you can block me so I don't disturb you further.`;
+}
+
+function backFromModal(){
+  modalEl.classList.remove('active');
+  letterEl.classList.add('visible');
+  goBack();
+}
+
+function option2(){
+  set(`
+    <div class='note-header' style='color:#ff76a2;'>Yay! 🎉</div>
+    <p>Please copy paste this and send it to my DM</p>
+    <p>:I'm going to be so happy when i receive this textt from you.</p><br>
+    <div style="background:#fff0f5; border:3px solid #ff76a2; padding:15px; border-radius:10px; font-family:'Courier New', monospace;">
+      Shruu, Let's give it another try...
+    </div>
+  `, `<button class='back' onclick='goBack()'>Back</button>`);
+}
+
+function option3(){
+  set(`
+    <div class='note-header' style='color:#ffb347;'>📘 Your suggestion</div>
+    <p> ..............Please dm me your suggestion...........</p>
+    <p>My suggestion is following <p>
+   <p>we go no contact till end semester and then talk it out and date for 2 months more to decide and if it still doesn't work out we can clean end.</p>
+  `, `
+    <button class='back' onclick='goBack()'>Back</button>
+    <button class='next' onclick='navigate(finalStrategic)'>I agree 🌟</button>
+  `);
+}
+
+function finalStrategic(){
+  set(`
+    <div class='note-header' style='color:#ffb347;'> If it's about making it work</div>
+    <p>If it's a yes to my suggestion, I am gratefull to get a chance.</p>
+    <p>End sems → New beginning.</p>
+    <p>If it's a no and your suggestion is also about making it work, I'm gratefull for that as well.</p>
+  `, `<button class='back' onclick='goBack()'>Back</button>`);
+}
+</script>
+
+</body>
+</html>
